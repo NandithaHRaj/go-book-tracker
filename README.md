@@ -19,6 +19,7 @@ This project is part of my journey to strengthen Go fundamentals before moving i
 - PostgreSQL (Phase 2 – planned)
 
 📁 Project Structure
+```
 go-book-tracker/
 │
 ├── cmd/
@@ -30,3 +31,4 @@ go-book-tracker/
 │   └── handler/
 │
 ├── go.mod
+```
