@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"go-book-tracker/model"
 	"go-book-tracker/storage"
-	"strings"
+	"github.com/go-chi/chi/v5"
 )
 
 func BookHandler(w http.ResponseWriter, r *http.Request){
@@ -61,7 +61,7 @@ func AddBook(w http.ResponseWriter, r *http.Request){
 }
 
 func GetBookByID(w http.ResponseWriter, r *http.Request){
-	id := strings.TrimPrefix(r.URL.Path,"/books/")
+	id := chi.URLParam(r, "id")
 
 	for _, book := range storage.Books {
 		if book.ID == id{
@@ -74,7 +74,7 @@ func GetBookByID(w http.ResponseWriter, r *http.Request){
 }
 
 func UpdateBook(w http.ResponseWriter, r *http.Request){
-	id := strings.TrimPrefix(r.URL.Path,"/books/")
+	id := chi.URLParam(r, "id")
 
 	var updatedBook model.Book
     err := json.NewDecoder(r.Body).Decode(&updatedBook)
@@ -86,6 +86,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request){
 	for i,book := range storage.Books {
 		if book.ID == id {
 
+            updatedBook.ID = id
 			storage.Books[i] = updatedBook
 
 			json.NewEncoder(w).Encode(updatedBook)
@@ -98,7 +99,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request){
 
 func DeleteBook(w http.ResponseWriter, r *http.Request){
 
-	id := strings.TrimPrefix(r.URL.Path, "/books/")
+	id := chi.URLParam(r, "id")
 
 	for i,book := range storage.Books {
 		if book.ID == id {

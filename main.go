@@ -1,18 +1,18 @@
 package main
 
 import (
-	"net/http"
 	"log"
-	"go-book-tracker/handler"
+	"go-book-tracker/router"
+	"net/http"
 )
 
 func main(){
-	http.HandleFunc("/books", handler.BookHandler)
-	http.HandleFunc("/books/", handler.BookHandlerByID)
+
+	r := router.SetupRouter()
 
 	log.Println("Server running on 8080")
 
-	err := http.ListenAndServe(":8080",nil)
+	err := http.ListenAndServe(":8080", r)
 	
 	if err != nil{
 		log.Fatal(err)
