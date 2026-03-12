@@ -4,47 +4,25 @@ import (
 	"net/http"
 	"encoding/json"
 	"go-book-tracker/model"
-	"go-book-tracker/storage"
+	"go-book-tracker/service"
 	"github.com/go-chi/chi/v5"
 )
 
-func BookHandler(w http.ResponseWriter, r *http.Request){
-	if r.Method == http.MethodGet {
-		GetBooks(w, r)
-		return
-	}
-
-	if r.Method == http.MethodPost {
-		AddBook(w, r)
-		return
-	}
-
-	http.Error(w, "Method not Allowed!", http.StatusMethodNotAllowed)
+type BookHandler struct {
+	service *service.BookService
 }
 
-func BookHandlerByID(w http.ResponseWriter, r *http.Request){
-	if r.Method == http.MethodGet{
-		GetBookByID(w, r)
-		return
-	}
-    if r.Method == http.MethodPut{
-		UpdateBook(w, r)
-		return
-	}
-	if r.Method == http.MethodDelete{
-		DeleteBook(w, r)
-		return
-	}
-
-	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+func NewBookHandler(service *service.BookService) *BookHandler {
+	return &BookHandler{service: service}
 }
 
-func GetBooks(w http.ResponseWriter, r *http.Request){
+func (h *BookHandler) GetBooks(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type","application/json")
-	json.NewEncoder(w).Encode(storage.Books)
+	books := h.service.GetBooks()
+	json.NewEncoder(w).Encode(books)
 }
 
-func AddBook(w http.ResponseWriter, r *http.Request){
+func (h *BookHandler) AddBook(w http.ResponseWriter, r *http.Request){
 	var newBook model.Book
 
 	err := json.NewDecoder(r.Body).Decode(&newBook)
@@ -54,26 +32,26 @@ func AddBook(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	storage.Books = append(storage.Books, newBook)
+	h.service.AddBook(newBook)
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(newBook)
 }
 
-func GetBookByID(w http.ResponseWriter, r *http.Request){
+func (h *BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request){
 	id := chi.URLParam(r, "id")
 
-	for _, book := range storage.Books {
-		if book.ID == id{
-			json.NewEncoder(w).Encode(book)
-			return
-		}
-	}	
+	book, found := h.service.GetBookByID(id)
 
-	http.Error(w, "Book Not Found", http.StatusNotFound)
+	if !found{
+		http.Error(w, "Book Not Found", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(book)
 }
 
-func UpdateBook(w http.ResponseWriter, r *http.Request){
+func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request){
 	id := chi.URLParam(r, "id")
 
 	var updatedBook model.Book
@@ -83,32 +61,30 @@ func UpdateBook(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	for i,book := range storage.Books {
-		if book.ID == id {
+	updatedBook.ID = id
 
-            updatedBook.ID = id
-			storage.Books[i] = updatedBook
-
-			json.NewEncoder(w).Encode(updatedBook)
-			return
-		}
+	success := h.service.UpdateBook(id, updatedBook)
+    
+	if !success {
+		http.Error(w, "Book Not Found", http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Book Not Found", http.StatusNotFound)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(updatedBook)
 }
 
-func DeleteBook(w http.ResponseWriter, r *http.Request){
+func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request){
 
 	id := chi.URLParam(r, "id")
 
-	for i,book := range storage.Books {
-		if book.ID == id {
-            storage.Books = append(storage.Books[:i], storage.Books[i+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	success := h.service.DeleteBook(id)
+
+	if !success {
+		http.Error(w, "Book Not Found", http.StatusNotFound)
+		return
 	}
 
-	http.Error(w, "Book Not Found", http.StatusNotFound)
+	w.WriteHeader(http.StatusNoContent)
 }
 

@@ -6,7 +6,7 @@ import (
 	"go-book-tracker/handler"
 )
 
-func SetupRouter() http.Handler {
+func SetupRouter(handler *handler.BookHandler) http.Handler {
 
 	r := chi.NewRouter()
 
