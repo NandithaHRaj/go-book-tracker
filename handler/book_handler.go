@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"go-book-tracker/model"
 	"go-book-tracker/service"
+	"go-book-tracker/utils"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -17,9 +18,8 @@ func NewBookHandler(service *service.BookService) *BookHandler {
 }
 
 func (h *BookHandler) GetBooks(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type","application/json")
 	books := h.service.GetBooks()
-	json.NewEncoder(w).Encode(books)
+	utils.JSON(w, http.StatusOK, books)
 }
 
 func (h *BookHandler) AddBook(w http.ResponseWriter, r *http.Request){
@@ -33,9 +33,7 @@ func (h *BookHandler) AddBook(w http.ResponseWriter, r *http.Request){
 	}
 
 	h.service.AddBook(newBook)
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newBook)
+	utils.JSON(w, http.StatusCreated, newBook)
 }
 
 func (h *BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request){
@@ -48,7 +46,7 @@ func (h *BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	json.NewEncoder(w).Encode(book)
+	utils.JSON(w, http.StatusOK, book)
 }
 
 func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request){
@@ -70,8 +68,7 @@ func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(updatedBook)
+	utils.JSON(w, http.StatusOK, updatedBook)
 }
 
 func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request){
@@ -85,6 +82,7 @@ func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	utils.JSON(w, http.StatusNoContent, nil)
+
 }
 
