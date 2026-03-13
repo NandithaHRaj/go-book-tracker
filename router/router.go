@@ -4,11 +4,14 @@ import (
 	"net/http"
 	"github.com/go-chi/chi/v5"
 	"go-book-tracker/handler"
+	"go-book-tracker/middleware"
 )
 
 func SetupRouter(handler *handler.BookHandler) http.Handler {
 
 	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
 
 	r.Get("/books", handler.GetBooks)
 	r.Post("/books", handler.AddBook)
