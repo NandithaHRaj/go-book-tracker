@@ -29,7 +29,13 @@ func (h *BookHandler) AddBook(w http.ResponseWriter, r *http.Request){
 	err := json.NewDecoder(r.Body).Decode(&newBook)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = utils.ValidateBook(newBook)
+	if err != nil {
+		utils.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	newBook.ID = uuid.New().String()
@@ -43,7 +49,7 @@ func (h *BookHandler) GetBookByID(w http.ResponseWriter, r *http.Request){
 	book, found := h.service.GetBookByID(id)
 
 	if !found{
-		http.Error(w, "Book Not Found", http.StatusNotFound)
+		utils.Error(w, http.StatusNotFound, "Book not found")
 		return
 	}
 
@@ -56,7 +62,13 @@ func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request){
 	var updatedBook model.Book
     err := json.NewDecoder(r.Body).Decode(&updatedBook)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		utils.Error(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = utils.ValidateBook(updatedBook)
+	if err != nil {
+		utils.Error(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -65,7 +77,7 @@ func (h *BookHandler) UpdateBook(w http.ResponseWriter, r *http.Request){
 	success := h.service.UpdateBook(id, updatedBook)
     
 	if !success {
-		http.Error(w, "Book Not Found", http.StatusNotFound)
+		utils.Error(w, http.StatusNotFound, "Book not found")
 		return
 	}
 
@@ -79,7 +91,7 @@ func (h *BookHandler) DeleteBook(w http.ResponseWriter, r *http.Request){
 	success := h.service.DeleteBook(id)
 
 	if !success {
-		http.Error(w, "Book Not Found", http.StatusNotFound)
+		utils.Error(w, http.StatusNotFound, "Book not found")
 		return
 	}
 
