@@ -19,9 +19,9 @@ func (m *MemoryRepository) GetAll() []model.Book {
 }
 
 func (m *MemoryRepository) GetByID(id string) (*model.Book, bool)			 {
-	for _,book := range m.books {
-		if book.ID == id{
-			return &book, true
+	for i := range m.books {
+		if m.books[i].ID == id{
+			return &m.books[i], true
 		}
 	}
     return nil, false

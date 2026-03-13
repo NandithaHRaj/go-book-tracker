@@ -7,6 +7,7 @@ import (
 	"go-book-tracker/service"
 	"go-book-tracker/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type BookHandler struct {
@@ -31,7 +32,7 @@ func (h *BookHandler) AddBook(w http.ResponseWriter, r *http.Request){
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	newBook.ID = uuid.New().String()
 	h.service.AddBook(newBook)
 	utils.JSON(w, http.StatusCreated, newBook)
 }
