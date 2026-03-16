@@ -1,24 +1,27 @@
 package repository
 
-import "go-book-tracker/model"
+import (
+	"go-book-tracker/model"
+	"context"
+)
 
 type BookRepository interface {
-	GetAll() []model.Book
-	GetByID(string) (*model.Book, bool)
-	Create(model.Book) 
-	Update(string, model.Book) bool
-	Delete(string) bool
+	GetAll(context.Context) []model.Book
+	GetByID(context.Context, string) (*model.Book, bool)
+	Create(context.Context, model.Book) 
+	Update(context.Context, string, model.Book) bool
+	Delete(context.Context, string) bool
 }
 
 type MemoryRepository struct {
 	books []model.Book
 }
 
-func (m *MemoryRepository) GetAll() []model.Book {
+func (m *MemoryRepository) GetAll(ctx context.Context) []model.Book {
 	return m.books
 }
 
-func (m *MemoryRepository) GetByID(id string) (*model.Book, bool)			 {
+func (m *MemoryRepository) GetByID(ctx context.Context, id string) (*model.Book, bool)			 {
 	for i := range m.books {
 		if m.books[i].ID == id{
 			return &m.books[i], true
@@ -27,11 +30,11 @@ func (m *MemoryRepository) GetByID(id string) (*model.Book, bool)			 {
     return nil, false
 }
 
-func (m *MemoryRepository) Create(book model.Book) {
+func (m *MemoryRepository) Create(ctx context.Context, book model.Book) {
 	m.books = append(m.books, book)
 }
 
-func (m *MemoryRepository) Update(id string, updatedBook model.Book) bool {
+func (m *MemoryRepository) Update(ctx context.Context, id string, updatedBook model.Book) bool {
     for i,book := range m.books {
 		if book.ID == id{
 			m.books[i] = updatedBook
@@ -41,7 +44,7 @@ func (m *MemoryRepository) Update(id string, updatedBook model.Book) bool {
 	return false
 }
 
-func (m *MemoryRepository) Delete(id string) bool {
+func (m *MemoryRepository) Delete(ctx context.Context, id string) bool {
 	 for i,book := range m.books {
 		if book.ID == id{
 			m.books = append(m.books[:i], m.books[i+1:]...)
